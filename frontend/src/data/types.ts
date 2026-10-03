@@ -18,6 +18,10 @@ export type ModuleMeta = {
   actions: string[]
   actionTargets: Record<string, string>
   metrics: string[]
+  /** 为 true 时状态只能沿 statuses 顺序逐级推进，越级操作一律挡回 */
+  oneWay?: boolean
+  /** 手册口径字典：字段名 → 允许取值，页面与校验统一从这里取，不另造口径 */
+  dictionaries?: Record<string, string[]>
 }
 
 export type PageResult = {

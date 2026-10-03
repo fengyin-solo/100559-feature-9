@@ -33,6 +33,18 @@
       <button class="btn ghost" type="button" @click="resetFilters">重置条件</button>
     </form>
 
+    <div v-if="deviationTodos.length" class="todo-panel">
+      <p class="todo-title">偏差联动待办（{{ deviationTodos.length }} 条，纠正措施与偏差记录一致）</p>
+      <ul>
+        <li v-for="todo in deviationTodos" :key="String(todo.id)">
+          <span class="receipt-code">{{ todo['来源偏差'] }}</span>
+          <span>{{ todo['设备名称'] }}</span>
+          <span>纠正措施：{{ todo['清洁规程'] || '—' }}</span>
+          <span class="todo-status">{{ todo.status }}</span>
+        </li>
+      </ul>
+    </div>
+
     <table class="data-table">
       <thead>
         <tr>
@@ -79,6 +91,7 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { listSyncedCleanTodos } from '@/api/deviation-service'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('cleanvalidate')
@@ -91,6 +104,7 @@ const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
+const deviationTodos = ref<EntryRow[]>([])
 const filterFields = columns.slice(0, 3)
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
@@ -128,6 +142,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    deviationTodos.value = listSyncedCleanTodos()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '清洁验证列表读取失败'
   }

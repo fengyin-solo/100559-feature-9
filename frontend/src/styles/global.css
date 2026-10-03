@@ -35,3 +35,25 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+.batch-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--muted); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.receipt-panel, .edit-panel, .todo-panel { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+.receipt-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.receipt-group { margin-bottom: 6px; }
+.receipt-title { margin: 4px 0; font-size: 13px; font-weight: 600; }
+.receipt-title[data-kind='advanced'] { color: #067647; }
+.receipt-title[data-kind='held'] { color: #b54708; }
+.receipt-title[data-kind='duplicate'] { color: var(--muted); }
+.receipt-title[data-kind='rejected'] { color: #b42318; }
+.receipt-group ul, .todo-panel ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.receipt-group li, .todo-panel li { margin: 2px 0; }
+.receipt-code { display: inline-block; min-width: 92px; font-weight: 600; }
+.receipt-empty { margin: 0; font-size: 12px; color: var(--muted); }
+.edit-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.edit-wide { flex: 1 1 100%; }
+.edit-wide input, .edit-wide textarea { width: 100%; }
+.edit-panel select, .edit-panel input, .edit-panel textarea { border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: inherit; }
+.edit-actions { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.todo-title { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #067647; }
+.todo-status { color: var(--muted); }
+.notice-text { color: #067647; }
