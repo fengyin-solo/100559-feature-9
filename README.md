@@ -68,4 +68,12 @@ npm run build
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
-- 想回到初始数据：清掉浏览器里 `pharma-cleanroom:entries` 这一项，或调用 `resetModule(模块)`。
+- 偏差模块按手册口径执行：
+  - 偏差类型只允许「重大偏差 / 主要偏差 / 次要偏差」，纠正措施只能选自措施清单
+    （见 `frontend/src/data/deviation-policy.ts`），越界一律打回重填。
+  - 状态单向推进：待处理 → 调查中 → 待质量复核 → 已关闭；重大偏差可从任一非终态整组升级到「已升级」，越级挡回。
+  - 勾选多条可批量送调查：逐条出回执，缺偏差类型/根本原因的先「暂缓」并单独提示；同一条偏差编号重复送审只算一次。
+  - 送调查时按发生工序分派责任车间；调查结论须经质量部复核通过才关闭。
+  - 影响清洁验证的偏差复核通过后，自动同步到清洁验证页的「偏差联动待办」，纠正措施实时取自偏差台账，两处一致。
+- 想回到初始数据：清掉浏览器里 `pharma-cleanroom:entries`、`pharma-cleanroom:clean-deviation-todos`
+  两项，或调用 `resetModule(模块)`。

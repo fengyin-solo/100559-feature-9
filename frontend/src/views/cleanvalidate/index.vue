@@ -63,6 +63,48 @@
       </tbody>
     </table>
 
+    <section class="todo-section">
+      <header class="todo-head">
+        <div>
+          <h3>偏差联动待办</h3>
+          <p class="page-desc">
+            影响清洁验证的偏差经质量部复核通过后自动挂到这里；纠正措施与偏差台账实时同源，两处看到的始终一致。
+          </p>
+        </div>
+        <label class="todo-filter">
+          <input v-model="hideDone" type="checkbox" />
+          仅看待办
+        </label>
+      </header>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th v-for="column in todoColumns" :key="column">{{ column }}</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="todo in visibleTodos" :key="todo.来源偏差编号">
+            <td v-for="column in todoColumns" :key="column">{{ todo[column] ?? '—' }}</td>
+            <td class="row-actions">
+              <button
+                v-if="todo.待办状态 === '待办'"
+                class="link link-pass"
+                type="button"
+                @click="finishTodo(todo.来源偏差编号)"
+              >
+                办结待办
+              </button>
+              <span v-else class="muted-text">已办结</span>
+            </td>
+          </tr>
+          <tr v-if="!visibleTodos.length">
+            <td :colspan="todoColumns.length + 1" class="empty-state">暂无偏差联动待办</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
     <footer class="page-foot">
       <span>共 {{ total }} 条清洁验证记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
@@ -74,12 +116,14 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  completeCleanDeviationTodo,
   downloadEntries,
+  listCleanDeviationTodos,
   listEntries,
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
-import type { EntryRow } from '@/data/types'
+import type { CleanTodoView, EntryRow } from '@/data/types'
 
 const meta = moduleMeta('cleanvalidate')
 const columns = ["验证编号", "设备名称", "清洁规程", "取样点", "残留限度", "检测结果", "验证人", "验证状态"]
@@ -87,7 +131,12 @@ const actions = ["提交验证", "确认验证", "判定失败"]
 const statuses = ["待验证", "验证中", "已验证", "验证失败"]
 const stats = [{"label": "待验证设备", "value": 0}, {"label": "验证中设备", "value": 0}, {"label": "已验证设备", "value": 0}]
 
+// 联动待办展示列：纠正措施取自偏差台账（同源），这里没有单独的编辑入口。
+const todoColumns = ["来源偏差编号", "设备名称", "关联工序", "取样点", "纠正措施", "偏差类型", "偏差状态", "待办状态", "创建日期"]
+
 const rows = ref<EntryRow[]>([])
+const todos = ref<CleanTodoView[]>([])
+const hideDone = ref(true)
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
@@ -97,6 +146,10 @@ const statusSummary = computed(() =>
     status,
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
+)
+
+const visibleTodos = computed(() =>
+  hideDone.value ? todos.value.filter((todo) => todo.待办状态 === '待办') : todos.value,
 )
 
 function resetFilters() {
@@ -122,12 +175,23 @@ function runAction(action: string, row: EntryRow) {
   reload()
 }
 
+function finishTodo(code: string) {
+  const result = completeCleanDeviationTodo(code)
+  errorMessage.value = result.ok ? '' : result.message
+  reloadTodos()
+}
+
+function reloadTodos() {
+  todos.value = listCleanDeviationTodos()
+}
+
 function reload() {
   errorMessage.value = ''
   try {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    reloadTodos()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '清洁验证列表读取失败'
   }
@@ -135,3 +199,28 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.todo-section {
+  margin-top: 18px;
+}
+.todo-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.todo-head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.todo-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.muted-text { color: var(--muted); }
+.link-pass { color: #166534; font-weight: 600; }
+</style>
